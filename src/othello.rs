@@ -60,15 +60,15 @@ impl Othello {
      * Creates a new Othello board in the starting position.
      */
     pub fn new() -> Othello {
-        Othello(0x0000001008000000, 0x0000000810000000)
+        Othello(0x0000000810000000, 0x0000001008000000)
     }
 
     /*
      * Creates a new Othello with the given BitBoards.
      */
     #[inline(always)]
-    fn create(white: BitBoard, black: BitBoard) -> Othello {
-        Othello(white, black)
+    fn create(black: BitBoard, white: BitBoard) -> Othello {
+        Othello(black, white)
     }
 
     /*
@@ -77,10 +77,16 @@ impl Othello {
     #[inline(always)]
     pub fn get_bitboard(&self, color: Color) -> BitBoard {
         match color {
-            Color::White => self.0,
-            Color::Black => self.1,
+            Color::Black => self.0,
+            Color::White => self.1,
         }
     }
+
+//#################################################################################################
+//
+//                                    MOVE GENERATION
+//
+//#################################################################################################
 
     /*
      * Generates all legal moves for the given color and returns the result as a
@@ -90,7 +96,6 @@ impl Othello {
         let own: BitBoard = self.get_bitboard(playing);
         let opp: BitBoard = self.get_bitboard(playing.invert());
 
-        //let mut w: BitBoard;
         let mut t: BitBoard;
         let mut moves: BitBoard = 0;
 
@@ -120,6 +125,12 @@ impl Othello {
         moves
     }
 
+//#################################################################################################
+//
+//                                    MOVE MAKING
+//
+//#################################################################################################
+
     /*
      * Makes the given move on the board and returns the new board.
      */
@@ -127,23 +138,20 @@ impl Othello {
         let mut own: BitBoard = self.get_bitboard(playing);
         let mut opp: BitBoard = self.get_bitboard(playing.invert());
 
-        //let mut w: BitBoard;
-        let mut c: BitBoard;
         let mut t: BitBoard;
 
         own |= mv;
 
         macro_rules! change_in_direction {
             ($dir: ident) => {
-                c = opp & $dir!(mv);
-                if c != 0 {
-                    t = c;
-                    loop {
-                        c = opp & $dir!(c);
-                        if c == 0 { break; }
-                        t |= c;
-                    }
-                    if $dir!(t) & own != 0 {
+                t = opp & $dir!(mv);
+                if t != 0 {
+                    t |= opp & $dir!(t);
+                    t |= opp & $dir!(t);
+                    t |= opp & $dir!(t);
+                    t |= opp & $dir!(t);
+                    t |= opp & $dir!(t);
+                    if own & $dir!(t) != 0 {
                         opp ^= t;
                         own ^= t;
                     }
@@ -160,7 +168,7 @@ impl Othello {
         change_in_direction!(south);
         change_in_direction!(south_east);
 
-        if playing == Color::White {
+        if playing == Color::Black {
             Self::create(own, opp)
         } else {
             Self::create(opp, own)
@@ -171,61 +179,48 @@ impl Othello {
      * Returns the state of the square at (x, y), where x and y are in 0..8.
      */
     pub fn get_square(&self, x: u8, y: u8) -> Square {
-        if self.get_bitboard(Color::White).contains(x, y) {
-            Square::White
-        } else if self.get_bitboard(Color::Black).contains(x, y) {
+        if self.get_bitboard(Color::Black).contains(x, y) {
             Square::Black
+        } else if self.get_bitboard(Color::White).contains(x, y) {
+            Square::White
         } else {
             Square::Empty
         }
     }
 
+//#################################################################################################
+//
+//                                        ACCESSERS
+//
+//#################################################################################################
+
     /*
      * Returns the score associated with the given board, that is, a simple count
      * of how many disks each player has.
      */
-    pub fn score(&self) -> (u8, u8) {
-        return (self.get_bitboard(Color::Black).pop_cnt(),
-                self.get_bitboard(Color::White).pop_cnt());
+    pub fn score(&self) -> Score {
+        let black_score = self.get_bitboard(Color::Black).pop_cnt();
+        let white_score = self.get_bitboard(Color::White).pop_cnt();
+
+        Score::new(black_score, white_score)
     }
 }
 
 //#################################################################################################
 //
-//                                  PERFT CORRECTNESS TEST
+//                                     PERFT TEST
 //
 //#################################################################################################
 
 /*
- * depth   leaf nodes count
- *     1                  4
- *     2                 12
- *     3                 56
- *     4                244
- *     5               1396
- *     6               8200
- *     7              55092
- *     8             390216
- *     9            3005288
- *    10           24571284
- *    11          212258800
- *    12         1939886636
+ * Performs a perft test
  */
+#[cfg(test)]
+mod perft_test {
+    use super::*;
 
-/*
- * Test functions that carries a perft type test of depth DEPTH (changeable).
- */
-#[test]
-fn test_othello() {
-    let depth: usize = 10;
-
-    let perft_table = vec![
-        1, 4, 12, 56, 244, 1396, 8200,
-        55092, 390216, 3005288, 24571284,
-        212258800, 1939886636,
-    ];
-
-    assert!(depth < perft_table.len(), "Depth must be at most {}", perft_table.len() - 1);
+    // Change depth here.
+    const DEPTH: usize = 10;
 
     /*
      * The perft function in itself, that counts the number of leaf nodes at depth 9.
@@ -249,7 +244,21 @@ fn test_othello() {
         return res;
     }
 
-    let res: u64 = perft(Othello::new(), Color::Black, depth);
+    /*
+     * Test functions that carries a perft type test at specified depth (tunable).
+     */
+    #[test]
+    fn correctnes() {
+        let perft_table = vec![
+            1, 4, 12, 56, 244, 1396, 8200,
+            55092, 390216, 3005288, 24571284,
+            212258800, 1939886636, 18429641748,
+        ];
 
-    assert_eq!(res, perft_table[depth], "Got an incorrect perft value for a depth of {}", depth);
+        assert!(DEPTH < perft_table.len(), "Depth must be at most {}", perft_table.len() - 1);
+
+        let res: u64 = perft(Othello::new(), Color::Black, DEPTH);
+
+        assert_eq!(res, perft_table[DEPTH], "Got an invalid perft value for a depth of {}", DEPTH);
+    }
 }

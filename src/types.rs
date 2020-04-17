@@ -99,3 +99,29 @@ pub enum Square {
 pub trait Player {
     fn chose_move(&self, oth: Othello, moves: BitBoard, color: Color) -> BitBoard;
 }
+
+//#################################################################################################
+//
+//                                    SCORE TYPE
+//
+//#################################################################################################
+
+/*
+ * The score type, containing black's score (left) and right's score (right).
+ */
+pub struct Score(u8, u8);
+
+impl Score {
+    pub fn new(black_score: u8, white_score: u8) -> Score {
+        Score(black_score, white_score)
+    }
+    /*
+     * Returns the score associated to the given color.
+     */
+    pub fn get(&self, color: Color) -> u8 {
+        match color {
+            Color::Black => self.0,
+            Color::White => self.1,
+        }
+    }
+}

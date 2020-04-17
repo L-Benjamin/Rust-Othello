@@ -164,15 +164,15 @@ pub fn terminal_play<P1: Player, P2: Player>(black: &P1, white: &P2) {
     }
 
     print_oth(&oth, moves, mv);
-    let score: (u8, u8) = oth.score();
+    let score: Score = oth.score();
     print!("Game over! Final score is [");
-    blue!(format!("X: {}", score.0));
+    blue!(format!("X: {}", score.get(Color::Black)));
     print!(" - ");
-    cyan!(format!("O: {}", score.1));
+    cyan!(format!("O: {}", score.get(Color::White)));
     println!("]");
-    if score.0 > score.1 {
+    if score.get(Color::Black) > score.get(Color::White) {
         blue!("X player won ! Congatulations !\n");
-    } else if score.0 < score.1 {
+    } else if score.get(Color::Black) < score.get(Color::White) {
         cyan!("O player won ! Congatulations !\n");
     } else {
         println!("It's a draw !");

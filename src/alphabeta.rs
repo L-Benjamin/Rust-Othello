@@ -62,11 +62,12 @@ fn evaluate(oth: Othello) -> i32 {
  */
 #[inline(always)]
 fn evaluate_end(oth: Othello) -> i32 {
-    let score: (u8, u8) = oth.score();
+    let black_score = oth.get_bitboard(Color::Black).pop_cnt();
+    let white_score = oth.get_bitboard(Color::White).pop_cnt();
 
-    if score.0 > score.1 {
+    if black_score > white_score {
         std::i32::MAX
-    } else if score.0 < score.1 {
+    } else if black_score < white_score {
         std::i32::MIN
     } else {
         0
