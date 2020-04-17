@@ -37,6 +37,9 @@ impl BitBoardTrait for BitBoard {
         self.count_ones() as u8
     }
 
+    /*
+     * More high-level method to determine if the point at (x, y) is in the given bitboard.
+     */
     fn contains(self, x: u8, y: u8) -> bool {
         1u64 << (x + 8 * y) & self != 0
     }

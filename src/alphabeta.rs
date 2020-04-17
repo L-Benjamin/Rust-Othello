@@ -1,16 +1,32 @@
 use crate::types::*;
 use crate::othello::*;
 
-pub struct AlphaBeta {
+//#################################################################################################
+//
+//                                     ALPHABETA TYPE
+//
+//#################################################################################################
+
+/*
+ * The type describing an AI using the minimax algorithm with alpha-beta pruning.
+ */
+pub struct AlphaBetaPlayer {
     max_depth: u8,
 }
 
-impl AlphaBeta {
-    pub fn new(max_depth: u8) -> AlphaBeta {
-        AlphaBeta { max_depth, }
+impl AlphaBetaPlayer {
+    /*
+     * Creates a new AlphaBetaPlayer AI.
+     */
+    pub fn new(max_depth: u8) -> AlphaBetaPlayer {
+        AlphaBetaPlayer { max_depth, }
     }
 }
 
+/*
+ * The evaluation function, using masks to do a weighted sum of the board and the move generation
+ * algorithm to measure mobility for both players.
+ */
 #[inline(always)]
 fn evaluate(oth: Othello) -> i32 {
     let mut res: i32 = 0;
@@ -24,10 +40,6 @@ fn evaluate(oth: Othello) -> i32 {
         }
     }
 
-    //delta_mask!(0x8100000000000081, 20);
-    //delta_mask!(0x7E8181818181817E, 5);
-    //delta_mask!(0x007E7E7E7E7E7E00, 1);
-
     delta_mask!(0x8100000000000081, 100);
     delta_mask!(0x2400810000810024, 10);
     delta_mask!(0x1800008181000018, 5);
@@ -36,11 +48,18 @@ fn evaluate(oth: Othello) -> i32 {
     delta_mask!(0x4281000000008142, -20);
     delta_mask!(0x0042000000004200, -50);
 
-    res += 5 * (oth.gen_moves(Color::Black).pop_cnt() - oth.gen_moves(Color::White).pop_cnt()) as i32;
+    let black_mobility: i32 = oth.gen_moves(Color::Black).pop_cnt() as i32;
+    let white_mobility: i32 = oth.gen_moves(Color::White).pop_cnt() as i32;
+    res += 5 * (black_mobility - white_mobility);
 
     res
 }
 
+/*
+ * Another evaluation function that specializes in ended games, returns the max value of i32 if
+ * black wins, the min value if white wins or 0 if it's a draw. The 0 encourages the AI to
+ * seek a draw if it's already loosing and can't manage to win.
+ */
 #[inline(always)]
 fn evaluate_end(oth: Othello) -> i32 {
     let score: (u8, u8) = oth.score();
@@ -54,6 +73,9 @@ fn evaluate_end(oth: Othello) -> i32 {
     }
 }
 
+/*
+ * Standard recursive minimax with alpha-beta prunig algorithm.
+ */
 fn alphabeta(oth: Othello, mut alpha: i32, mut beta: i32, mut color: Color, mut depth: u8) -> i32 {
     if depth == 0 {
         return evaluate(oth);
@@ -73,35 +95,41 @@ fn alphabeta(oth: Othello, mut alpha: i32, mut beta: i32, mut color: Color, mut 
         }
     }
 
+    let mut value: i32;
     let new_color = color.invert();
     depth -= 1;
+
     match color {
         Color::Black => {
-            let mut value: i32 = std::i32::MIN;
+            value = std::i32::MIN;
             while moves != 0 {
                 let new_oth = oth.make_move(color, moves.pop_lsb());
                 value = std::cmp::max(value, alphabeta(new_oth, alpha, beta, new_color, depth));
                 alpha = std::cmp::max(alpha, value);
                 if alpha >= beta { break; }
             }
-            return value;
         },
         Color::White => {
-            let mut value: i32 = std::i32::MAX;
+            value = std::i32::MAX;
             while moves != 0 {
                 let new_oth = oth.make_move(color, moves.pop_lsb());
                 value = std::cmp::min(value, alphabeta(new_oth, alpha, beta, new_color, depth));
                 beta = std::cmp::min(beta, value);
                 if alpha >= beta { break; }
             }
-            return value;
         },
     }
+
+    value
 }
 
-impl Player for AlphaBeta {
+impl Player for AlphaBetaPlayer {
+    /*
+     * Launches one thread per possible moves and wait for them to complete their tree search
+     * using the above alpha-beta algorithm and selects the best move, according to the color
+     * of the player.
+     */
     fn chose_move(&self, oth: Othello, mut moves: BitBoard, color: Color) -> BitBoard {
-
         let mut handles = vec![];
 
         while moves != 0 {
