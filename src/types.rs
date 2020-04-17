@@ -107,14 +107,18 @@ pub trait Player {
 //#################################################################################################
 
 /*
- * The score type, containing black's score (left) and right's score (right).
+ * The score type, holding the score of a finished game.
  */
 pub struct Score(u8, u8);
 
 impl Score {
+    /*
+     * Creates a new Score struct.
+     */
     pub fn new(black_score: u8, white_score: u8) -> Score {
         Score(black_score, white_score)
     }
+
     /*
      * Returns the score associated to the given color.
      */
