@@ -56,7 +56,7 @@ impl BitBoardTrait for BitBoard {
  */
 #[derive(Clone, Copy, PartialEq)]
 pub enum Color {
-    White, Black,
+    Black, White,
 }
 
 impl Color {
@@ -66,8 +66,8 @@ impl Color {
     #[inline(always)]
     pub fn invert(self) -> Color {
         match self {
-            Color::White => Color::Black,
             Color::Black => Color::White,
+            Color::White => Color::Black,
         }
     }
 }
@@ -84,7 +84,7 @@ impl Color {
  */
 #[derive(Clone, Copy)]
 pub enum Square {
-    Empty, White, Black,
+    Empty, Black, White,
 }
 
 //#################################################################################################

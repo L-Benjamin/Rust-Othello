@@ -10,7 +10,7 @@ Move generation and move making are carried out thanks to a bitboards-based repr
 
 The accuracy of the move engine is tested with the perft method, which consists in counting the numbers of leaf nodes of the game tree at a given limited depth and comparing that number with already-established tables. Here is the perft table used in this project:
 
-|depth|Number of leaf nodes|
+|Depth|Number of leaf nodes|
 |-----|--------------------|
 |0    |1                   |
 |1    |4                   |
@@ -25,7 +25,8 @@ The accuracy of the move engine is tested with the perft method, which consists 
 |10   |24571284            |
 |11   |212258800           |
 |12   |1939886636          |
-|13   |18429641748         |
+|13   |18429641748         |  
+|14   |184042084512        |
 
 The value of perft(13) was calculated by this program and never confirmed anywhere else.
 

@@ -7,5 +7,5 @@ use crate::terminal::*;
 use crate::alphabeta::*;
 
 fn main() {
-    terminal_play(&TerminalPlayer, &AlphaBetaPlayer::new(10));
+    terminal_play(&AlphaBetaPlayer::new(8), &AlphaBetaPlayer::new(8));
 }

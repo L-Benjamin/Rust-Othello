@@ -115,10 +115,10 @@ impl Othello {
         search_in_direction!(north);
         search_in_direction!(north_west);
         search_in_direction!(west);
-        search_in_direction!(east);
         search_in_direction!(south_west);
         search_in_direction!(south);
         search_in_direction!(south_east);
+        search_in_direction!(east);
 
         moves &= !(own | opp);
 
@@ -163,10 +163,10 @@ impl Othello {
         change_in_direction!(north);
         change_in_direction!(north_west);
         change_in_direction!(west);
-        change_in_direction!(east);
         change_in_direction!(south_west);
         change_in_direction!(south);
         change_in_direction!(south_east);
+        change_in_direction!(east);
 
         if playing == Color::Black {
             Self::create(own, opp)
@@ -241,18 +241,18 @@ mod perft_test {
             res += perft(oth.make_move(color, moves.pop_lsb()), color.invert(), depth-1)
         }
 
-        return res;
+        res
     }
 
     /*
-     * Test functions that carries a perft type test at specified depth (tunable).
+     * Test functions that carries a perft type test at a specified depth (tunable).
      */
     #[test]
     fn correctnes() {
         let perft_table = vec![
-            1, 4, 12, 56, 244, 1396, 8200,
-            55092, 390216, 3005288, 24571284,
-            212258800, 1939886636, 18429641748,
+            1, 4, 12, 56, 244, 1396, 8200, 55092,
+            390216, 3005288, 24571284, 212258800,
+            1939886636, 18429641748, 184042084512
         ];
 
         assert!(DEPTH < perft_table.len(), "Depth must be at most {}", perft_table.len() - 1);

@@ -53,23 +53,23 @@ pub fn print_oth(oth: &Othello, moves: BitBoard, mv: BitBoard) {
             match oth.get_square(x, y) {
                 Square::White => {
                     if mv.contains(x, y) {
-                        red!("O ")
+                        red!("O ");
                     } else {
-                        cyan!("O ")
+                        cyan!("O ");
                     }
                 },
                 Square::Black => {
                     if mv.contains(x, y) {
-                        red!("X ")
+                        red!("X ");
                     } else {
-                        blue!("X ")
+                        blue!("X ");
                     }
                 },
                 Square::Empty => {
                     if moves.contains(x, y) {
-                        yellow!("~ ")
+                        yellow!("~ ");
                     } else {
-                        print!("- ")
+                        print!("- ");
                     }
                 }
             }
@@ -99,9 +99,9 @@ impl Player for TerminalPlayer {
         let mut mv: BitBoard;
 
         if color == Color::Black {
-            blue!("X player")
+            blue!("X player");
         } else {
-            cyan!("O player")
+            cyan!("O player");
         }
 
         print!(", where do you want to ");
@@ -137,7 +137,7 @@ impl Player for TerminalPlayer {
  * Play a game in the terminal, one player taking turn after the other, both being asked
  * what they want to play each time. Gives the score at the end of the game.
  */
-pub fn terminal_play<P1: Player, P2: Player>(black: &P1, white: &P2) {
+pub fn terminal_play(black: &dyn Player, white: &dyn Player) {
     let mut oth: Othello = Othello::new();
     let mut moves: BitBoard;
     let mut mv: BitBoard = 0;
@@ -178,4 +178,40 @@ pub fn terminal_play<P1: Player, P2: Player>(black: &P1, white: &P2) {
         println!("It's a draw !");
     }
     println!();
+}
+
+//#################################################################################################
+//
+//                                      NOSCREEN PLAY
+//
+//#################################################################################################
+
+/*
+ * Play a game with no output on the screen.
+ */
+pub fn no_screen_play(black: &dyn Player, white: &dyn Player) -> Score {
+    let mut oth: Othello = Othello::new();
+    let mut moves: BitBoard;
+    let mut mv: BitBoard;
+    let mut color: Color = Color::Black;
+
+    loop {
+        moves = oth.gen_moves(color);
+        if moves == 0 {
+            color = color.invert();
+            moves = oth.gen_moves(color);
+            if moves == 0 { break; }
+        }
+
+        if color == Color::Black {
+            mv = black.chose_move(oth, moves, Color::Black);
+        } else {
+            mv = white.chose_move(oth, moves, Color::White);
+        }
+
+        oth = oth.make_move(color, mv);
+        color = color.invert();
+    }
+
+    oth.score()
 }

@@ -107,7 +107,9 @@ fn alphabeta(oth: Othello, mut alpha: i32, mut beta: i32, mut color: Color, mut 
                 let new_oth = oth.make_move(color, moves.pop_lsb());
                 value = std::cmp::max(value, alphabeta(new_oth, alpha, beta, new_color, depth));
                 alpha = std::cmp::max(alpha, value);
-                if alpha >= beta { break; }
+                if alpha >= beta {
+                    break;
+                }
             }
         },
         Color::White => {
@@ -116,7 +118,9 @@ fn alphabeta(oth: Othello, mut alpha: i32, mut beta: i32, mut color: Color, mut 
                 let new_oth = oth.make_move(color, moves.pop_lsb());
                 value = std::cmp::min(value, alphabeta(new_oth, alpha, beta, new_color, depth));
                 beta = std::cmp::min(beta, value);
-                if alpha >= beta { break; }
+                if alpha >= beta {
+                    break;
+                }
             }
         },
     }
