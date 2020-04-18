@@ -28,7 +28,7 @@ The accuracy of the move engine is tested with the perft method, which consists 
 |13   |18429641748         |  
 |14   |184042084512        |
 
-The value of perft(13) was calculated by this program and never confirmed anywhere else.
+The values of perft(13) and perft(14) were calculated by this program and never confirmed anywhere else.
 
 ## AI
 
