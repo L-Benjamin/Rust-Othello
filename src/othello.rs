@@ -216,7 +216,7 @@ impl Othello {
  * Performs a perft test
  */
 #[cfg(test)]
-mod perft_test {
+mod tests {
     use super::*;
 
     // Change depth here.
@@ -248,15 +248,16 @@ mod perft_test {
      * Test functions that carries a perft type test at a specified depth (tunable).
      */
     #[test]
-    fn correctnes() {
+    fn correctness() {
         let perft_table = vec![
             1, 4, 12, 56, 244, 1396, 8200, 55092,
             390216, 3005288, 24571284, 212258800,
-            1939886636, 18429641748, 184042084512
+            1939886636, 18429641748, 184042084512,
         ];
 
         assert!(DEPTH < perft_table.len(), "Depth must be at most {}", perft_table.len() - 1);
 
+        eprintln!("ici!");
         let res: u64 = perft(Othello::new(), Color::Black, DEPTH);
 
         assert_eq!(res, perft_table[DEPTH], "Got an invalid perft value for a depth of {}", DEPTH);

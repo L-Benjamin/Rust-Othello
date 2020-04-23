@@ -138,35 +138,35 @@ impl Player for AlphaBetaPlayer {
         let mut handles = vec![];
 
         while moves != 0 {
-            let m = moves.pop_lsb();
-            let o = oth.make_move(color, m);
-            let c = color.invert();
-            let d = self.max_depth;
-            handles.push(std::thread::spawn(move || -> (BitBoard, i32) {
-                (m, alphabeta(o, std::i32::MIN, std::i32::MAX, c, d))
+            let mv = moves.pop_lsb();
+            let oth = oth.make_move(color, mv);
+            let color = color.invert();
+            let depth = self.max_depth;
+            handles.push(std::thread::spawn(move || -> (i32, BitBoard) {
+                (alphabeta(oth, std::i32::MIN, std::i32::MAX, color, depth), mv)
             }));
         }
 
-        let mut res: (BitBoard, i32) = handles.remove(0).join().unwrap();
-        let mut best: BitBoard = res.0;
-        let mut val: i32 = res.1;
+        let mut res: (i32, BitBoard) = handles.remove(0).join().unwrap();
+        let mut val: i32 = res.0;
+        let mut best: BitBoard = res.1;
 
         match color {
             Color::Black => {
                 for handle in handles {
                     res = handle.join().unwrap();
-                    if res.1 > val {
-                        best = res.0;
-                        val = res.1;
+                    if res.0 > val {
+                        val = res.0;
+                        best = res.1;
                     }
                 }
             },
             Color::White => {
                 for handle in handles {
                     res = handle.join().unwrap();
-                    if res.1 < val {
-                        best = res.0;
-                        val = res.1;
+                    if res.0 < val {
+                        val = res.0;
+                        best = res.1;
                     }
                 }
             },

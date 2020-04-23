@@ -111,7 +111,8 @@ impl Player for TerminalPlayer {
         loop {
             input.clear();
             match std::io::stdin().read_line(&mut input) {
-                _ => (), // The professional way to handle exceptions.
+                Ok(_) => (), // The professional way to handle exceptions.
+                Err(_) => panic!("Couldn't read from the terminal."),
             }
 
             bytes = input.as_bytes();
@@ -178,40 +179,4 @@ pub fn terminal_play(black: &dyn Player, white: &dyn Player) {
         println!("It's a draw !");
     }
     println!();
-}
-
-//#################################################################################################
-//
-//                                      NOSCREEN PLAY
-//
-//#################################################################################################
-
-/*
- * Play a game with no output on the screen.
- */
-pub fn no_screen_play(black: &dyn Player, white: &dyn Player) -> Score {
-    let mut oth: Othello = Othello::new();
-    let mut moves: BitBoard;
-    let mut mv: BitBoard;
-    let mut color: Color = Color::Black;
-
-    loop {
-        moves = oth.gen_moves(color);
-        if moves == 0 {
-            color = color.invert();
-            moves = oth.gen_moves(color);
-            if moves == 0 { break; }
-        }
-
-        if color == Color::Black {
-            mv = black.chose_move(oth, moves, Color::Black);
-        } else {
-            mv = white.chose_move(oth, moves, Color::White);
-        }
-
-        oth = oth.make_move(color, mv);
-        color = color.invert();
-    }
-
-    oth.score()
 }
